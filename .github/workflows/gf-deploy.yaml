@@ -34,7 +34,6 @@ jobs:
       - name: Build with Maven
         run: |
           ./mvnw clean package -DskipTests=true
-          rm target/stock-crawler-*-SNAPSHOT.jar
       - name: GCP Authenticate
         uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
         with:
