@@ -19,9 +19,6 @@ jobs:
   deploy:
     name: Deploy Functions
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [ 3.8 ]
 
     steps:
       - uses: actions/checkout@v2
@@ -45,11 +42,12 @@ jobs:
       - name: Deploy To Google Functions
         run: |
           echo $FUNCTION_ENV | base64 -d > env.yaml
-          gcloud functions deploy stock-crawler \
+          gcloud functions deploy ii-ne-bot \
             --project $GCP_SA_PROJECT_ID \
             --quiet \
             --entry-point=org.springframework.cloud.function.adapter.gcp.GcfJarLauncher \
-            --trigger-topic=favorite --env-vars-file=env.yaml \
+            --trigger-topic=favorite \
+            --env-vars-file=env.yaml \
             --source=target \
             --runtime=java11 \
             --memory=1024MB \
