@@ -1,7 +1,8 @@
-package com.fooqoo56.iine.bot.function.infrastracture.api.dto.request;
+package com.fooqoo56.iine.bot.function.infrastracture.api.dto.constant;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 @Getter
@@ -11,5 +12,6 @@ public enum  ResultType {
     RECENT("recent"),
     POPULAR("popular");
 
+    @NonNull
     private final String name;
 }

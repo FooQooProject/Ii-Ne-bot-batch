@@ -1,6 +1,8 @@
 package com.fooqoo56.iine.bot.function.infrastracture.api.dto.request;
 
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
+import com.fooqoo56.iine.bot.function.infrastracture.api.dto.constant.Lang;
+import com.fooqoo56.iine.bot.function.infrastracture.api.dto.constant.ResultType;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

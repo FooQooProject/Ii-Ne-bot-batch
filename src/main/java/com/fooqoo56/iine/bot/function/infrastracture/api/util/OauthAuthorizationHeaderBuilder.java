@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.Builder;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.web.util.UriUtils;
 
 @Builder
@@ -21,18 +22,25 @@ public class OauthAuthorizationHeaderBuilder implements Serializable {
 
     private static final long serialVersionUID = -8790302082606292722L;
 
+    @NonNull
     private final String consumerSecret;
 
+    @NonNull
     private final String method;
 
+    @NonNull
     private final Map<String, String> queryParameters;
 
+    @NonNull
     private final String tokenSecret;
 
+    @NonNull
     private final String url;
 
+    @NonNull
     private final String consumerKey;
 
+    @NonNull
     private final String accessToken;
 
     /**
@@ -40,6 +48,7 @@ public class OauthAuthorizationHeaderBuilder implements Serializable {
      *
      * @return OauthHeader
      */
+    @NonNull
     public String getOauthHeader() {
         final Map<String, String> parameters = new LinkedHashMap<>(queryParameters);
 
@@ -83,10 +92,17 @@ public class OauthAuthorizationHeaderBuilder implements Serializable {
      * @param s the string to encode
      * @return and encoded string
      */
+    @NonNull
     private String encodeUriComponent(final String s) {
         return UriUtils.encode(s, UTF_8);
     }
 
+    /**
+     * OauthHmacSignerの取得.
+     *
+     * @return OauthHmacSigner
+     */
+    @NonNull
     private OAuthHmacSigner getOauthHmacSigner() {
         final OAuthHmacSigner signer = new OAuthHmacSigner();
         signer.clientSharedSecret = consumerSecret;
@@ -94,6 +110,13 @@ public class OauthAuthorizationHeaderBuilder implements Serializable {
         return signer;
     }
 
+    /**
+     * 署名を生成する.
+     *
+     * @param message メッセージ
+     * @return 署名
+     */
+    @NonNull
     private String generateSignature(final String message) {
         final OAuthHmacSigner signer = getOauthHmacSigner();
 

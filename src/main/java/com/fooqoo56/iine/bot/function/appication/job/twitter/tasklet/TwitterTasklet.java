@@ -1,6 +1,6 @@
 package com.fooqoo56.iine.bot.function.appication.job.twitter.tasklet;
 
-import com.fooqoo56.iine.bot.function.appication.exception.NotFoundTweetException;
+import com.fooqoo56.iine.bot.function.exception.NotFoundTweetException;
 import com.fooqoo56.iine.bot.function.appication.service.TwitterService;
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
@@ -35,6 +35,7 @@ public class TwitterTasklet implements Tasklet {
      * @return RepeatStatus
      */
     @Override
+    @NonNull
     public RepeatStatus execute(@NonNull final StepContribution contribution,
                                 @NonNull final ChunkContext chunkContext) {
 
@@ -52,7 +53,7 @@ public class TwitterTasklet implements Tasklet {
             throw new NotFoundTweetException();
         }
 
-        final TweetResponse tweetResponse = twitterService.favoriteTweet(tweetIds);
+        twitterService.favoriteTweet(tweetIds);
 
         return RepeatStatus.FINISHED;
     }

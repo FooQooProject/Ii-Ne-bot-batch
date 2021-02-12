@@ -1,6 +1,6 @@
 package com.fooqoo56.iine.bot.function.appication.service;
 
-import com.fooqoo56.iine.bot.function.appication.exception.AlreadyFavoritedTweetException;
+import com.fooqoo56.iine.bot.function.exception.AlreadyFavoritedTweetException;
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
 import com.fooqoo56.iine.bot.function.domain.repository.api.TwitterRepository;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.request.TweetRequest;
@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -30,6 +31,7 @@ public class TwitterService {
      * @param payload 検索条件
      * @return ツイートレスポンス
      */
+    @NonNull
     public List<TweetResponse> findTweet(final TweetCondition payload) {
 
         if (StringUtils.isNoneBlank(payload.getQuery())) {
@@ -67,16 +69,15 @@ public class TwitterService {
      * ツイートをいいねする.
      *
      * @param tweetIds ツイートIDのリスト
-     * @return ツイートレスポンス
      * @throws AlreadyFavoritedTweetException 全てのツイートがすでにいいねされたツイートだった場合の例外
      */
-    public TweetResponse favoriteTweet(final List<String> tweetIds)
+    public void favoriteTweet(final List<String> tweetIds)
             throws AlreadyFavoritedTweetException {
 
         for (final String id : tweetIds) {
             if (StringUtils.isNoneBlank(id)) {
                 try {
-                    return twitterRepository.favoriteTweet(id);
+                    twitterRepository.favoriteTweet(id);
                 } catch (final RuntimeException exception) {
                     log.warn(exception.getMessage());
                 }

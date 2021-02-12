@@ -20,6 +20,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.lang.NonNull;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @ConfigurationPropertiesScan
@@ -50,6 +51,7 @@ public class IiNeBotFunctionApplication {
      *
      * @return job
      */
+    @NonNull
     private static JobParameters createJobParams() {
         return new JobParametersBuilder().addDate(DATE_PARAM, new Date()).toJobParameters();
     }
@@ -60,6 +62,7 @@ public class IiNeBotFunctionApplication {
      * @return 関数
      */
     @Bean
+    @NonNull
     public Consumer<PubSubMessage> pubSubFunction() {
         return message -> {
             // The PubSubMessage data field arrives as a base-64 encoded string and must be decoded.
@@ -79,6 +82,7 @@ public class IiNeBotFunctionApplication {
      * @param message pubsubメッセージ
      * @return デコードされたdataパラメータ
      */
+    @NonNull
     private String getDecodedMessage(final PubSubMessage message) {
         if (Objects.nonNull(message)) {
             if (StringUtils.isNoneBlank(message.getData())) {

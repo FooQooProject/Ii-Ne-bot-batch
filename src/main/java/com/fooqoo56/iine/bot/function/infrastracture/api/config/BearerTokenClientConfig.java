@@ -11,6 +11,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConstructorBinding;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
+import org.springframework.lang.NonNull;
 import org.springframework.web.reactive.function.client.ExchangeFilterFunctions;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.netty.http.client.HttpClient;
@@ -21,11 +22,23 @@ import reactor.netty.http.client.HttpClient;
 @Slf4j
 @Getter
 public class BearerTokenClientConfig {
+
+    @NonNull
     private final String baseUrl;
+
+    @NonNull
     private final String path;
+
+    @NonNull
     private final Duration connectTimeout;
+
+    @NonNull
     private final Duration readTimeout;
+
+    @NonNull
     private final String apikey;
+
+    @NonNull
     private final String apiSecret;
 
     /**
@@ -35,6 +48,7 @@ public class BearerTokenClientConfig {
      * @return WebClient
      */
     @Bean
+    @NonNull
     public WebClient bearerTokenTwitterClient(final RestRequestFilter restRequestFilter) {
         final HttpClient httpClient = HttpClient.create()
                 .baseUrl(baseUrl)

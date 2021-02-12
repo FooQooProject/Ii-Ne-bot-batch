@@ -1,4 +1,4 @@
-package com.fooqoo56.iine.bot.function.appication.exception;
+package com.fooqoo56.iine.bot.function.exception;
 
 public class AlreadyFavoritedTweetException extends TwitterException {
 

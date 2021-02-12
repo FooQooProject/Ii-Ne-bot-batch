@@ -8,11 +8,9 @@ import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetRespo
 import com.fooqoo56.iine.bot.function.infrastracture.api.util.OauthAuthorizationHeaderBuilder;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -49,7 +47,7 @@ public class TwitterRepositoryImpl implements TwitterRepository {
      * {@inheritDoc}
      */
     @Override
-    public TweetResponse favoriteTweet(final String id) {
+    public void favoriteTweet(final String id) {
 
         final OauthAuthorizationHeaderBuilder builder = OauthAuthorizationHeaderBuilder
                 .builder()
@@ -69,7 +67,7 @@ public class TwitterRepositoryImpl implements TwitterRepository {
                         .build()
                         .toString();
 
-        return twitterFavoriteClient
+        twitterFavoriteClient
                 .post()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, builder.getOauthHeader())
