@@ -39,7 +39,7 @@ public class Oauth2Filter implements ExchangeFilterFunction {
      */
     @NonNull
     private String getBearerToken() {
-        final Oauth2Response response = bearerTokenClient.getBearerToken();
+        final Oauth2Response response = bearerTokenClient.getBearerToken().block();
 
         if (Objects.nonNull(response)) {
             return BEARER_PREFIX + response.getAccessToken();

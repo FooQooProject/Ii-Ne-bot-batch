@@ -13,6 +13,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 @Repository
 @RequiredArgsConstructor
@@ -26,15 +27,14 @@ public class BearerTokenClient {
      *
      * @return Oauth2Response
      */
-    public Oauth2Response getBearerToken() {
+    public Mono<Oauth2Response> getBearerToken() {
 
         return bearerTokenTwitterClient
                 .post()
                 .uri(config.getPath())
                 .bodyValue(getBody())
                 .retrieve()
-                .bodyToMono(Oauth2Response.class)
-                .block();
+                .bodyToMono(Oauth2Response.class);
     }
 
     /**

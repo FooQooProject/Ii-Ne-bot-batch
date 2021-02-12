@@ -2,6 +2,8 @@ package com.fooqoo56.iine.bot.function.domain.repository.api;
 
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.request.TweetRequest;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetListResponse;
+import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
+import reactor.core.publisher.Mono;
 
 public interface TwitterRepository {
 
@@ -11,12 +13,12 @@ public interface TwitterRepository {
      * @param request TweetRequest
      * @return TwitterFollowerResponse
      */
-    TweetListResponse findTweet(final TweetRequest request);
+    Mono<TweetListResponse> findTweet(final TweetRequest request);
 
     /**
      * ツイートのいいね.
      *
      * @param id ツイートID
      */
-    void favoriteTweet(final String id);
+    Mono<TweetResponse> favoriteTweet(final String id);
 }

@@ -1,8 +1,8 @@
 package com.fooqoo56.iine.bot.function.appication.service;
 
-import com.fooqoo56.iine.bot.function.exception.AlreadyFavoritedTweetException;
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
 import com.fooqoo56.iine.bot.function.domain.repository.api.TwitterRepository;
+import com.fooqoo56.iine.bot.function.exception.AlreadyFavoritedTweetException;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.request.TweetRequest;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetListResponse;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
@@ -38,9 +38,10 @@ public class TwitterService {
 
             final List<TweetListResponse> tweetListResponses = new ArrayList<>();
 
-            tweetListResponses
-                    .add(twitterRepository
-                            .findTweet(TweetRequest.convertPayloadToRequest(payload)));
+            twitterRepository
+                    .findTweet(TweetRequest.convertPayloadToRequest(payload))
+                    .map(tweetListResponses::add)
+                    .subscribe();
 
             for (int idx = 1; idx <= 5; idx++) {
                 if (StringUtils
@@ -52,11 +53,12 @@ public class TwitterService {
                     break;
                 }
 
-                tweetListResponses
-                        .add(twitterRepository.findTweet(TweetRequest
-                                .convertPayloadToRequestWithPayload(payload,
-                                        tweetListResponses.get(idx - 1).getSearchMetaData()
-                                                .getNextMaxId())));
+                twitterRepository.findTweet(TweetRequest
+                        .convertPayloadToRequestWithPayload(payload,
+                                tweetListResponses.get(idx - 1).getSearchMetaData()
+                                        .getNextMaxId()))
+                        .map(tweetListResponses::add)
+                        .subscribe();
             }
 
             return tweetListResponses.stream().map(TweetListResponse::getStatuses)
@@ -77,7 +79,7 @@ public class TwitterService {
         for (final String id : tweetIds) {
             if (StringUtils.isNoneBlank(id)) {
                 try {
-                    twitterRepository.favoriteTweet(id);
+                    twitterRepository.favoriteTweet(id).subscribe();
                 } catch (final RuntimeException exception) {
                     log.warn(exception.getMessage());
                 }

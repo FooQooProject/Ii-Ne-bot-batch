@@ -13,6 +13,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Mono;
 
 
 @Repository
@@ -27,7 +28,7 @@ public class TwitterRepositoryImpl implements TwitterRepository {
      * {@inheritDoc}
      */
     @Override
-    public TweetListResponse findTweet(final TweetRequest request) {
+    public Mono<TweetListResponse> findTweet(final TweetRequest request) {
 
         final String url = UriComponentsBuilder.newInstance()
                 .path(getSearchPath())
@@ -39,15 +40,14 @@ public class TwitterRepositoryImpl implements TwitterRepository {
                 .get()
                 .uri(url)
                 .retrieve()
-                .bodyToMono(TweetListResponse.class)
-                .block();
+                .bodyToMono(TweetListResponse.class);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void favoriteTweet(final String id) {
+    public Mono<TweetResponse> favoriteTweet(final String id) {
 
         final OauthAuthorizationHeaderBuilder builder = OauthAuthorizationHeaderBuilder
                 .builder()
@@ -67,13 +67,12 @@ public class TwitterRepositoryImpl implements TwitterRepository {
                         .build()
                         .toString();
 
-        twitterFavoriteClient
+        return twitterFavoriteClient
                 .post()
                 .uri(url)
                 .header(HttpHeaders.AUTHORIZATION, builder.getOauthHeader())
                 .retrieve()
-                .bodyToMono(TweetResponse.class)
-                .block();
+                .bodyToMono(TweetResponse.class);
     }
 
     /**
