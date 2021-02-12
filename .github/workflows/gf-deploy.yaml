@@ -49,7 +49,7 @@ jobs:
             --project $GCP_SA_PROJECT_ID \
             --quiet \
             --entry-point=org.springframework.cloud.function.adapter.gcp.GcfJarLauncher \
-            --trigger-topic=stock --env-vars-file=env.yaml \
+            --trigger-topic=favorite --env-vars-file=env.yaml \
             --source=target \
             --runtime=java11 \
             --memory=1024MB \
