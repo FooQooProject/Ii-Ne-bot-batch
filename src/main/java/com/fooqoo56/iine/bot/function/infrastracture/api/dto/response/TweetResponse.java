@@ -24,10 +24,10 @@ public class TweetResponse implements Serializable {
     User user;
 
     @JsonProperty("retweet_count")
-    Integer retweetCount;
+    Long retweetCount;
 
     @JsonProperty("favorite_count")
-    Integer favoriteCount;
+    Long favoriteCount;
 
     @JsonProperty("favorited")
     Boolean favoriteFlag;
@@ -51,8 +51,8 @@ public class TweetResponse implements Serializable {
         id = StringUtils.EMPTY;
         text = StringUtils.EMPTY;
         user = new User();
-        retweetCount = 0;
-        favoriteCount = 0;
+        retweetCount = 0L;
+        favoriteCount = 0L;
         favoriteFlag = false;
         retweetFlag = false;
         sensitiveFlag = false;
@@ -71,19 +71,19 @@ public class TweetResponse implements Serializable {
         String id;
 
         @JsonProperty("followers_count")
-        Integer followersCount;
+        Long followersCount;
 
         @JsonProperty("friends_count")
-        Integer friendsCount;
+        Long friendsCount;
 
         @JsonProperty("listed_count")
-        Integer listedCount;
+        Long listedCount;
 
         @JsonProperty("favourites_count")
-        Integer favouritesCount;
+        Long favouritesCount;
 
         @JsonProperty("statuses_count")
-        Integer statusesCount;
+        Long statusesCount;
 
         @JsonProperty("following")
         Boolean following;
@@ -99,11 +99,11 @@ public class TweetResponse implements Serializable {
          */
         public User() {
             id = StringUtils.EMPTY;
-            followersCount = 0;
-            friendsCount = 0;
-            listedCount = 0;
-            favouritesCount = 0;
-            statusesCount = 0;
+            followersCount = 0L;
+            friendsCount = 0L;
+            listedCount = 0L;
+            favouritesCount = 0L;
+            statusesCount = 0L;
             following = false;
             defaultProfileFlag = true;
             defaultProfileImageFlag = true;

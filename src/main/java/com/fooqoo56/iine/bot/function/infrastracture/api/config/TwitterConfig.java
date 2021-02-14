@@ -67,7 +67,6 @@ public class TwitterConfig {
                 .responseTimeout(readTimeout)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout.toMillisPart())
                 .resolver(DefaultAddressResolverGroup.INSTANCE);
-        ;
 
         final ReactorClientHttpConnector connector =
                 new ReactorClientHttpConnector(httpClient);
@@ -98,7 +97,6 @@ public class TwitterConfig {
                 .responseTimeout(readTimeout)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, connectTimeout.toMillisPart())
                 .resolver(DefaultAddressResolverGroup.INSTANCE);
-        ;
 
         final ReactorClientHttpConnector connector =
                 new ReactorClientHttpConnector(httpClient);

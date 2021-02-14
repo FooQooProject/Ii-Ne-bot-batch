@@ -1,18 +1,13 @@
 package com.fooqoo56.iine.bot.function.infrastracture.api.repositoryimpl;
 
-import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.Oauth2Response;
 import com.fooqoo56.iine.bot.function.infrastracture.api.config.BearerTokenClientConfig;
+import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.Oauth2Response;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 @Repository
