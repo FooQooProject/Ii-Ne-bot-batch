@@ -14,19 +14,7 @@ public class PubSubMessage implements Serializable {
     private static final long serialVersionUID = 2724247698103283771L;
 
     @NonNull
-    private final String query;
-
-    @NonNull
-    private final Long retweetCount;
-
-    @NonNull
-    private final Long favoriteCount;
-
-    @NonNull
-    private final Long followersCount;
-
-    @NonNull
-    private final Long friendsCount;
+    private final String data;
 
     @NonNull
     private final Map<String, String> attributes;
