@@ -9,6 +9,7 @@ import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetRespo
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +42,7 @@ public class TwitterService {
             twitterRepository
                     .findTweet(TweetRequest.convertPayloadToRequest(payload))
                     .map(tweetListResponses::add)
-                    .subscribe();
+                    .block();
 
             for (int idx = 1; idx <= 5; idx++) {
                 if (StringUtils
@@ -58,7 +59,7 @@ public class TwitterService {
                                 tweetListResponses.get(idx - 1).getSearchMetaData()
                                         .getNextMaxId()))
                         .map(tweetListResponses::add)
-                        .subscribe();
+                        .block();
             }
 
             return tweetListResponses.stream().map(TweetListResponse::getStatuses)
@@ -79,7 +80,9 @@ public class TwitterService {
         for (final String id : tweetIds) {
             if (StringUtils.isNoneBlank(id)) {
                 try {
-                    twitterRepository.favoriteTweet(id).subscribe();
+                    log.info(Objects.requireNonNull(twitterRepository.favoriteTweet(id).block())
+                            .toString());
+                    return;
                 } catch (final RuntimeException exception) {
                     log.warn(exception.getMessage());
                 }

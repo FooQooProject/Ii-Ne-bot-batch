@@ -16,20 +16,30 @@ public class TweetCondition implements Serializable {
 
     private static final long serialVersionUID = 5371709977743888346L;
 
+    public static final String PARAM_QUERY = "query";
+
+    public static final String PARAM_RETWEET_COUNT = "retweetCount";
+
+    public static final String PARAM_FAVORITE_COUNT = "favoriteCount";
+
+    public static final String PARAM_FOLLOWERS_COUNT = "followersCount";
+
+    public static final String PARAM_FRIENDS_COUNT = "friendsCount";
+
     @NonNull
     private final String query;
 
     @NonNull
-    private final Integer retweetCount;
+    private final Long retweetCount;
 
     @NonNull
-    private final Integer favoriteCount;
+    private final Long favoriteCount;
 
     @NonNull
-    private final Integer followersCount;
+    private final Long followersCount;
 
     @NonNull
-    private final Integer friendsCount;
+    private final Long friendsCount;
 
     /**
      * Json生成.
@@ -42,11 +52,11 @@ public class TweetCondition implements Serializable {
      */
     @JsonCreator
     public TweetCondition(
-            @JsonProperty("query") final String query,
-            @JsonProperty("retweetCount") final Integer retweetCount,
-            @JsonProperty("favoriteCount") final Integer favoriteCount,
-            @JsonProperty("followersCount") final Integer followersCount,
-            @JsonProperty("friendsCount") final Integer friendsCount
+            @JsonProperty(PARAM_QUERY) final String query,
+            @NonNull @JsonProperty(PARAM_RETWEET_COUNT) final Long retweetCount,
+            @NonNull @JsonProperty(PARAM_FAVORITE_COUNT) final Long favoriteCount,
+            @NonNull @JsonProperty(PARAM_FOLLOWERS_COUNT) final Long followersCount,
+            @NonNull @JsonProperty(PARAM_FRIENDS_COUNT) final Long friendsCount
     ) {
         this.query = StringUtils.defaultString(query);
         this.retweetCount = retweetCount;

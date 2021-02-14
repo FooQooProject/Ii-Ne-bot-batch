@@ -1,8 +1,7 @@
-package com.fooqoo56.iine.bot.function.appication.job.twitter.tasklet;
+package com.fooqoo56.iine.bot.function.appication.service;
 
-import com.fooqoo56.iine.bot.function.exception.NotFoundTweetException;
-import com.fooqoo56.iine.bot.function.appication.service.TwitterService;
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
+import com.fooqoo56.iine.bot.function.exception.NotFoundTweetException;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
 import java.util.Comparator;
 import java.util.List;
@@ -11,40 +10,28 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.batch.core.StepContribution;
-import org.springframework.batch.core.scope.context.ChunkContext;
-import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.lang.NonNull;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
+@Service
 @Slf4j
-@Component
 @RequiredArgsConstructor
-public class TwitterTasklet implements Tasklet {
+public class IiNeBotService {
 
     private static final int RETRY_NUM_OF_TWEET = 10;
 
     private final TwitterService twitterService;
 
-    /**
-     * Twitterタスクレット.
-     *
-     * @param contribution StepContribution
-     * @param chunkContext ChunkContext
-     * @return RepeatStatus
-     */
-    @Override
     @NonNull
-    public RepeatStatus execute(@NonNull final StepContribution contribution,
-                                @NonNull final ChunkContext chunkContext) {
+    public RepeatStatus execute(final String date, final String query) {
 
-        final TweetCondition payload = new TweetCondition("Next.js", 3, 3, 10, 10);
+        final TweetCondition payload = new TweetCondition(query, 3L, 3L, 10L, 10L);
 
         final List<TweetResponse> response = twitterService.findTweet(payload);
         final List<String> tweetIds =
                 response.stream().filter(res -> isValidatedTweet(res, payload))
-                        .sorted(Comparator.comparingInt(s -> s.getUser().getFavouritesCount()))
+                        .sorted(Comparator.comparingLong(s -> s.getUser().getFavouritesCount()))
                         .map(TweetResponse::getId)
                         .limit(RETRY_NUM_OF_TWEET)
                         .collect(Collectors.toList());
@@ -107,7 +94,7 @@ public class TwitterTasklet implements Tasklet {
      * @param right right
      * @return left > rightであれば、true
      */
-    private boolean isGraterThan(final Integer left, final Integer right) {
+    private boolean isGraterThan(final Long left, final Long right) {
         if (Objects.isNull(left) || Objects.isNull(right)) {
             return false;
         }

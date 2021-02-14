@@ -1,15 +1,19 @@
 package com.fooqoo56.iine.bot.function.appication.config;
 
 import com.fooqoo56.iine.bot.function.appication.job.JobListener;
-import com.fooqoo56.iine.bot.function.appication.job.twitter.tasklet.TwitterTasklet;
+import com.fooqoo56.iine.bot.function.appication.service.IiNeBotService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
 import org.springframework.batch.core.configuration.annotation.EnableBatchProcessing;
 import org.springframework.batch.core.configuration.annotation.JobBuilderFactory;
 import org.springframework.batch.core.configuration.annotation.StepBuilderFactory;
+import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.launch.support.RunIdIncrementer;
+import org.springframework.batch.core.step.tasklet.MethodInvokingTaskletAdapter;
+import org.springframework.batch.core.step.tasklet.Tasklet;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
@@ -23,40 +27,55 @@ import org.springframework.stereotype.Component;
 public class StepConfig {
 
     public static final String JOB = "job";
-    private static final String KYO_GO_FINDER_STEP = "KyoGoFinder";
+    private static final String II_NE_BOT_STEP = "Ii-Ne-bot";
 
     private final JobBuilderFactory jobBuilderFactory;
     private final StepBuilderFactory stepBuilderFactory;
     private final JobListener jobListener;
-    private final TwitterTasklet twitterTasklet;
+
+    private final IiNeBotService iiNeBotService;
 
     /**
      * ステップのbean.
      *
      * @return Stepインスタンス
      */
-    @Bean(name = KYO_GO_FINDER_STEP)
+    @Bean(name = II_NE_BOT_STEP)
     @NonNull
-    public Step kyoGoFinderStep() {
-        return stepBuilderFactory.get(KYO_GO_FINDER_STEP).tasklet(twitterTasklet).build();
+    public Step iiNeBotStep(final Tasklet twitterTasklet) {
+        return stepBuilderFactory.get(II_NE_BOT_STEP).tasklet(twitterTasklet).build();
     }
 
     /**
      * Jobのbean.
      *
-     * @param kyoGoFinderStep Stepインスタンス
+     * @param iiNeBotStep Stepインスタンス
      * @return Job
      */
     @Bean(name = JOB)
     @NonNull
-    public Job job(@Qualifier(KYO_GO_FINDER_STEP) final Step kyoGoFinderStep) {
+    public Job job(@Qualifier(II_NE_BOT_STEP) final Step iiNeBotStep) {
 
         return jobBuilderFactory
                 .get(JOB)
                 .incrementer(new RunIdIncrementer())
                 .listener(jobListener)
-                .start(kyoGoFinderStep)
+                .start(iiNeBotStep)
                 .build();
     }
 
+    @Bean
+    @StepScope
+    public Tasklet twitterTasklet(
+            @Value("#{jobParameters['date']}") final String date,
+            @Value("#{jobParameters['query']}") final String query) {
+
+        final MethodInvokingTaskletAdapter tasklet = new MethodInvokingTaskletAdapter();
+
+        tasklet.setTargetObject(iiNeBotService);
+        tasklet.setTargetMethod("execute");
+        tasklet.setArguments(new Object[] {date, query});
+
+        return tasklet;
+    }
 }
