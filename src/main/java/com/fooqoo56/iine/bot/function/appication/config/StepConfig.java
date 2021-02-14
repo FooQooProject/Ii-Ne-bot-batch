@@ -67,14 +67,18 @@ public class StepConfig {
     @Bean
     @StepScope
     public Tasklet twitterTasklet(
-            @Value("#{jobParameters['date']}") final String date,
-            @Value("#{jobParameters['query']}") final String query) {
+            @Value("#{jobParameters['query']}") final String query,
+            @Value("#{jobParameters['favoriteCount']}") final Long favoriteCount,
+            @Value("#{jobParameters['followersCount']}") final Long followersCount,
+            @Value("#{jobParameters['friendsCount']}") final Long friendsCount,
+            @Value("#{jobParameters['retweetCount']}") final Long retweetCount) {
 
         final MethodInvokingTaskletAdapter tasklet = new MethodInvokingTaskletAdapter();
 
         tasklet.setTargetObject(iiNeBotService);
         tasklet.setTargetMethod("execute");
-        tasklet.setArguments(new Object[] {date, query});
+        tasklet.setArguments(
+                new Object[] {query, favoriteCount, followersCount, friendsCount, retweetCount});
 
         return tasklet;
     }

@@ -24,9 +24,15 @@ public class IiNeBotService {
     private final TwitterService twitterService;
 
     @NonNull
-    public RepeatStatus execute(final String date, final String query) {
+    public RepeatStatus execute(final String query, final Long favoriteCount,
+                                final Long followersCount, final Long friendsCount,
+                                final Long retweetCount) {
 
-        final TweetCondition payload = new TweetCondition(query, 3L, 3L, 10L, 10L);
+        final TweetCondition payload =
+                new TweetCondition(query, retweetCount, favoriteCount, followersCount,
+                        friendsCount);
+
+        log.info(payload.toString());
 
         final List<TweetResponse> response = twitterService.findTweet(payload);
         final List<String> tweetIds =

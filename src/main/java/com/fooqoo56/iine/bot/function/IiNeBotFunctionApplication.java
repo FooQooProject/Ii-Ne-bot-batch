@@ -91,37 +91,24 @@ public class IiNeBotFunctionApplication {
     @NonNull
     public Consumer<PubSubMessage> pubSubFunction() {
         return message -> {
+            if (Objects.isNull(message)) {
+                return;
+            }
             // The PubSubMessage data field arrives as a base-64 encoded string and must be decoded.
             // See: https://cloud.google.com/functions/docs/calling/pubsub#event_structure
             try {
                 final TweetCondition tweetCondition =
                         new TweetCondition(
-                                getDecodedMessage(message),
-                                3L,
-                                3L,
-                                10L,
-                                10L);
+                                StringUtils.defaultString(message.getQuery()),
+                                Objects.requireNonNullElse(message.getRetweetCount(), 0L),
+                                Objects.requireNonNullElse(message.getFavoriteCount(), 0L),
+                                Objects.requireNonNullElse(message.getFollowersCount(), 0L),
+                                Objects.requireNonNullElse(message.getFriendsCount(), 0L));
                 run(tweetCondition);
             } catch (final Exception e) {
                 e.printStackTrace();
             }
         };
-    }
-
-    /**
-     * メッセージをデコードする.
-     *
-     * @param message pubsubメッセージ
-     * @return デコードされたdataパラメータ
-     */
-    @NonNull
-    private String getDecodedMessage(final PubSubMessage message) {
-        if (Objects.nonNull(message)) {
-            if (StringUtils.isNoneBlank(message.getData())) {
-                return message.getData();
-            }
-        }
-        return StringUtils.EMPTY;
     }
 
 }

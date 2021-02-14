@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 
 @RequiredArgsConstructor
 @Getter
-public enum  ResultType {
+public enum ResultType {
 
     MIXED("mixed"),
     RECENT("recent"),

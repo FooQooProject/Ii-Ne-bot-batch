@@ -14,18 +14,12 @@ import org.springframework.lang.NonNull;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class TweetCondition implements Serializable {
 
-    private static final long serialVersionUID = 5371709977743888346L;
-
     public static final String PARAM_QUERY = "query";
-
     public static final String PARAM_RETWEET_COUNT = "retweetCount";
-
     public static final String PARAM_FAVORITE_COUNT = "favoriteCount";
-
     public static final String PARAM_FOLLOWERS_COUNT = "followersCount";
-
     public static final String PARAM_FRIENDS_COUNT = "friendsCount";
-
+    private static final long serialVersionUID = 5371709977743888346L;
     @NonNull
     private final String query;
 

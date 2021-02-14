@@ -24,7 +24,7 @@ public class NotFoundTweetException extends TwitterException {
      * コンストラクタ.
      *
      * @param message メッセージ
-     * @param cause Throwable
+     * @param cause   Throwable
      */
     public NotFoundTweetException(final String message, final Throwable cause) {
         super(message, cause);
