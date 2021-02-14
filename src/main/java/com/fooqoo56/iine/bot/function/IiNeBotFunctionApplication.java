@@ -8,9 +8,12 @@ import static com.fooqoo56.iine.bot.function.domain.model.TweetCondition.PARAM_Q
 import static com.fooqoo56.iine.bot.function.domain.model.TweetCondition.PARAM_RETWEET_COUNT;
 
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fooqoo56.iine.bot.function.appication.config.StepConfig;
 import com.fooqoo56.iine.bot.function.domain.model.PubSubMessage;
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 import java.util.Objects;
 import java.util.function.Consumer;
@@ -97,18 +100,32 @@ public class IiNeBotFunctionApplication {
             // The PubSubMessage data field arrives as a base-64 encoded string and must be decoded.
             // See: https://cloud.google.com/functions/docs/calling/pubsub#event_structure
             try {
+                final ObjectMapper objectMapper = new ObjectMapper();
+
                 final TweetCondition tweetCondition =
-                        new TweetCondition(
-                                StringUtils.defaultString(message.getQuery()),
-                                Objects.requireNonNullElse(message.getRetweetCount(), 0L),
-                                Objects.requireNonNullElse(message.getFavoriteCount(), 0L),
-                                Objects.requireNonNullElse(message.getFollowersCount(), 0L),
-                                Objects.requireNonNullElse(message.getFriendsCount(), 0L));
+                        objectMapper.readValue(getDecodedMessage(message), TweetCondition.class);
+
                 run(tweetCondition);
             } catch (final Exception e) {
                 e.printStackTrace();
             }
         };
+    }
+
+    /**
+     * メッセージをデコードする.
+     *
+     * @param message pubsubメッセージ
+     * @return デコードされたdataパラメータ
+     */
+    private String getDecodedMessage(final PubSubMessage message) {
+        if (Objects.nonNull(message)) {
+            if (StringUtils.isNoneBlank(message.getData())) {
+                return new String(Base64.getDecoder().decode(message.getData()),
+                        StandardCharsets.UTF_8);
+            }
+        }
+        return StringUtils.EMPTY;
     }
 
 }
