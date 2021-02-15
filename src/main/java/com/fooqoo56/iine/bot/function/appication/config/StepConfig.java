@@ -64,6 +64,16 @@ public class StepConfig {
                 .build();
     }
 
+    /**
+     * タスクレット.
+     *
+     * @param query          クエリ
+     * @param favoriteCount  いいね数
+     * @param followersCount フォロワー数
+     * @param friendsCount   フォロー数
+     * @param retweetCount   リツイート数
+     * @return タスクレット
+     */
     @Bean
     @StepScope
     public Tasklet twitterTasklet(

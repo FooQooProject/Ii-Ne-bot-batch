@@ -23,6 +23,16 @@ public class IiNeBotService {
 
     private final TwitterService twitterService;
 
+    /**
+     * Ii-Ne-Bot実行.
+     *
+     * @param query          クエリ
+     * @param favoriteCount  いいね数
+     * @param followersCount フォロワー数
+     * @param friendsCount   フォロー数
+     * @param retweetCount   リツイート数
+     * @return RepeatStatus.FINISHED
+     */
     @NonNull
     public RepeatStatus execute(final String query, final Long favoriteCount,
                                 final Long followersCount, final Long friendsCount,

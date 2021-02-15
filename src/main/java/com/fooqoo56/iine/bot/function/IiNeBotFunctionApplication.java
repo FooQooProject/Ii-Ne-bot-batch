@@ -46,6 +46,10 @@ public class IiNeBotFunctionApplication {
      * Spring Boot main.
      *
      * @param args args
+     * @throws JobParametersInvalidException       JobParametersInvalidException
+     * @throws JobExecutionAlreadyRunningException JobExecutionAlreadyRunningException
+     * @throws JobRestartException                 JobRestartException
+     * @throws JobInstanceAlreadyCompleteException JobInstanceAlreadyCompleteException
      */
     public static void main(final String[] args)
             throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
@@ -53,6 +57,15 @@ public class IiNeBotFunctionApplication {
         run(new TweetCondition("Next.js", 3L, 3L, 10L, 10L));
     }
 
+    /**
+     * Job実行.
+     *
+     * @param tweetCondition ツイート条件
+     * @throws JobParametersInvalidException       JobParametersInvalidException
+     * @throws JobExecutionAlreadyRunningException JobExecutionAlreadyRunningException
+     * @throws JobRestartException                 JobRestartException
+     * @throws JobInstanceAlreadyCompleteException JobInstanceAlreadyCompleteException
+     */
     private static void run(final TweetCondition tweetCondition)
             throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
             JobRestartException, JobInstanceAlreadyCompleteException {
@@ -71,7 +84,8 @@ public class IiNeBotFunctionApplication {
     /**
      * jobパラメータを取得.
      *
-     * @return job
+     * @param tweetCondition ツイート条件
+     * @return JobParameters
      */
     @NonNull
     private static JobParameters createJobParams(final TweetCondition tweetCondition) {
