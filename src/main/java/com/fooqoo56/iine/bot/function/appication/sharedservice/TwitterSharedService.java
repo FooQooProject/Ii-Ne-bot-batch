@@ -47,7 +47,7 @@ public class TwitterSharedService {
 
             return Flux.range(1, 5)
                     .flatMap(idx -> {
-                        if ("0".equals(request.getMaxId())) {
+                        if (NO_MORE_TWEET_ID.equals(request.getMaxId())) {
                             return Mono.just(new TweetListResponse());
                         } else {
                             return twitterRepository.findTweet(request)
