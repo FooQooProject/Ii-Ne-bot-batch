@@ -5,13 +5,6 @@ public class NotFoundTweetException extends TwitterException {
     private static final long serialVersionUID = 2372240258976640838L;
 
     /**
-     * デフォルトコンストラクタ.
-     */
-    public NotFoundTweetException() {
-
-    }
-
-    /**
      * message引数コンストラクタ.
      *
      * @param message メッセージ

@@ -5,13 +5,6 @@ public abstract class TwitterException extends RuntimeException {
     private static final long serialVersionUID = -8870701197622795497L;
 
     /**
-     * デフォルトコンストラクタ.
-     */
-    public TwitterException() {
-
-    }
-
-    /**
      * message引数コンストラクタ.
      *
      * @param message メッセージ

@@ -1,18 +1,18 @@
 package application.service
 
-import com.fooqoo56.iine.bot.function.appication.service.TwitterService
+import com.fooqoo56.iine.bot.function.appication.sharedservice.TwitterSharedService
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition
 import com.fooqoo56.iine.bot.function.domain.repository.api.TwitterRepository
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.request.TweetRequest
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetListResponse
-import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse
+import reactor.core.publisher.Mono
 import spock.lang.Specification
 import spock.lang.Unroll
 
-class TwitterServiceSpec extends Specification {
+class TwitterSharedServiceSpec extends Specification {
 
     TwitterRepository twitterRepository
-    TwitterService twitterService
+    TwitterSharedService twitterService
 
     final setup() {
         twitterRepository = Mock(TwitterRepository)
@@ -22,18 +22,18 @@ class TwitterServiceSpec extends Specification {
     @Unroll
     final "getFollower"() {
         given:
-        twitterService = new TwitterService(twitterRepository)
-        final response = new TweetListResponse()
+        twitterService = new TwitterSharedService(twitterRepository)
+        final response = Mono.just(new TweetListResponse())
         twitterRepository.findTweet(_ as TweetRequest) >> response
 
         when:
-        final result = twitterService.findTweet(request)
+        final result = twitterService.findTweet(request).block()
 
         then:
         result == expected
 
         where:
-        request    || expected
+        request                                     || expected
         new TweetCondition("Next.js", 3, 3, 10, 10) || []
     }
 }
