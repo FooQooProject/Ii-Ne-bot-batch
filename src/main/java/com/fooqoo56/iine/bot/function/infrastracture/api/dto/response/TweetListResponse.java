@@ -57,8 +57,6 @@ public class TweetListResponse implements Serializable {
         public SearchMetaData(
                 @JsonProperty("next_results") final String nextResults
         ) {
-
-
             this.nextMaxId = getMaxIdFromNextResults(nextResults);
         }
 
