@@ -1,10 +1,10 @@
 package com.fooqoo56.iine.bot.function.appication.service;
 
+import com.fooqoo56.iine.bot.function.appication.sharedservice.TwitterSharedService;
 import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
 import com.fooqoo56.iine.bot.function.exception.NotFoundTweetException;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +13,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
@@ -21,7 +22,7 @@ public class IiNeBotService {
 
     private static final int RETRY_NUM_OF_TWEET = 10;
 
-    private final TwitterService twitterService;
+    private final TwitterSharedService twitterSharedService;
 
     /**
      * Ii-Ne-Bot実行.
@@ -42,21 +43,25 @@ public class IiNeBotService {
                 new TweetCondition(query, retweetCount, favoriteCount, followersCount,
                         friendsCount);
 
-        log.info(payload.toString());
-
-        final List<TweetResponse> response = twitterService.findTweet(payload);
-        final List<String> tweetIds =
-                response.stream().filter(res -> isValidatedTweet(res, payload))
-                        .sorted(Comparator.comparingLong(s -> s.getUser().getFavouritesCount()))
+        Mono.just(payload)
+                .log()
+                .flatMap(twitterSharedService::findTweet)
+                .map(response -> response.stream().filter(res -> isValidatedTweet(res, payload))
+                        .sorted(Comparator
+                                .comparingLong(s -> s.getUser().getFavouritesCount()))
                         .map(TweetResponse::getId)
                         .limit(RETRY_NUM_OF_TWEET)
-                        .collect(Collectors.toList());
-
-        if (tweetIds.isEmpty()) {
-            throw new NotFoundTweetException();
-        }
-
-        twitterService.favoriteTweet(tweetIds);
+                        .collect(Collectors.toList()))
+                .doOnNext(
+                        ids -> {
+                            if (ids.isEmpty()) {
+                                throw new NotFoundTweetException("ツイートが見つかりませんでした");
+                            }
+                        }
+                )
+                .flatMap(twitterSharedService::favoriteTweet)
+                .then()
+                .block();
 
         return RepeatStatus.FINISHED;
     }

@@ -7,12 +7,12 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import lombok.Builder;
-import lombok.Value;
+import lombok.Data;
 import org.springframework.lang.NonNull;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 
-@Value
+@Data
 @Builder
 public class TweetRequest implements Serializable {
 
@@ -21,25 +21,25 @@ public class TweetRequest implements Serializable {
     private static final String DEFAULT_MAX_ID = "-1";
 
     @NonNull
-    String query;
+    private final String query;
 
     @NonNull
-    Lang lang = Lang.JA;
+    private final Lang lang = Lang.JA;
 
     @NonNull
-    ResultType resultType = ResultType.RECENT;
+    private final ResultType resultType = ResultType.RECENT;
 
     @NonNull
-    Integer count = 100;
+    private final Integer count = 100;
 
     @NonNull
-    Boolean includeEntitiesFlag = false;
+    private final Boolean includeEntitiesFlag = false;
 
     @NonNull
-    LocalDate until = LocalDate.now();
+    private final LocalDate until = LocalDate.now();
 
     @NonNull
-    String maxId;
+    private String maxId;
 
     /**
      * payloadをAPIクエリへ変換.
@@ -47,27 +47,11 @@ public class TweetRequest implements Serializable {
      * @param payload PayLoad
      * @return APIクエリ
      */
-    public static TweetRequest convertPayloadToRequest(final TweetCondition payload) {
+    public static TweetRequest buildTweetRequest(final TweetCondition payload) {
         return TweetRequest
                 .builder()
                 .query(addFilterRetweet(payload.getQuery()))
                 .maxId(DEFAULT_MAX_ID)
-                .build();
-    }
-
-    /**
-     * payloadをAPIクエリへ変換.
-     *
-     * @param payload PayLoad
-     * @param maxId   maxId
-     * @return APIクエリ
-     */
-    public static TweetRequest convertPayloadToRequestWithPayload(final TweetCondition payload,
-                                                                  final String maxId) {
-        return TweetRequest
-                .builder()
-                .query(addFilterRetweet(payload.getQuery()))
-                .maxId(maxId)
                 .build();
     }
 
