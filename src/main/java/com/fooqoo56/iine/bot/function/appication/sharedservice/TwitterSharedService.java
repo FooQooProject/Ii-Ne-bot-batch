@@ -38,30 +38,26 @@ public class TwitterSharedService {
      */
     @NonNull
     public Mono<List<TweetResponse>> findTweet(final TweetCondition payload)
-            throws InvalidTweetConditionException, NotFoundTweetException {
+            throws InvalidTweetConditionException {
 
         if (StringUtils.isNoneBlank(payload.getQuery())) {
 
             // グローバルなリクエスト
             final TweetRequest request = TweetRequest.buildTweetRequest(payload);
 
-            try {
-                return Flux.range(1, 5)
-                        .flatMap(idx -> {
-                            if ("0".equals(request.getMaxId())) {
-                                return Mono.just(new TweetListResponse());
-                            } else {
-                                return twitterRepository.findTweet(request)
-                                        .doOnNext(res -> request.setMaxId(
-                                                res.getSearchMetaData().getNextMaxId()));
-                            }
-                        })
-                        .collectList()
-                        .map(responses -> responses.stream().map(TweetListResponse::getStatuses)
-                                .flatMap(Collection::stream).collect(Collectors.toList()));
-            } catch (final Exception e) {
-                throw new NotFoundTweetException("ツイート取得時にエラーが発生しました", e);
-            }
+            return Flux.range(1, 5)
+                    .flatMap(idx -> {
+                        if ("0".equals(request.getMaxId())) {
+                            return Mono.just(new TweetListResponse());
+                        } else {
+                            return twitterRepository.findTweet(request)
+                                    .doOnNext(res -> request.setMaxId(
+                                            res.getSearchMetaData().getNextMaxId()));
+                        }
+                    })
+                    .collectList()
+                    .map(responses -> responses.stream().map(TweetListResponse::getStatuses)
+                            .flatMap(Collection::stream).collect(Collectors.toList()));
         }
 
         throw new InvalidTweetConditionException("queryに値がありません");
