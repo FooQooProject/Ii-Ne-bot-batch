@@ -1,18 +1,23 @@
 package com.fooqoo56.iine.bot.function.infrastracture.api.repositoryimpl;
 
 import com.fooqoo56.iine.bot.function.domain.repository.api.TwitterRepository;
-import com.fooqoo56.iine.bot.function.infrastracture.api.config.TwitterConfig;
+import com.fooqoo56.iine.bot.function.infrastracture.api.config.ApiSetting;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.request.TweetRequest;
+import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.Oauth2Response;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetListResponse;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
 import com.fooqoo56.iine.bot.function.infrastracture.api.util.OauthAuthorizationHeaderBuilder;
+import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.util.UriComponentsBuilder;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 
@@ -20,27 +25,32 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class TwitterRepositoryImpl implements TwitterRepository {
 
-    private final TwitterConfig config;
+    private static final String BEARER_PREFIX = "Bearer ";
+
+    private final ApiSetting twitterFavoriteApiSetting;
+
     private final WebClient twitterSearchClient;
     private final WebClient twitterFavoriteClient;
+    private final WebClient bearerTokenTwitterClient;
+    private final WebClient twitterLookupClient;
 
     /**
      * {@inheritDoc}
      */
     @Override
     public Mono<TweetListResponse> findTweet(final TweetRequest request) {
-
-        final String url = UriComponentsBuilder.newInstance()
-                .path(getSearchPath())
-                .queryParams(request.getQueryMap())
-                .build()
-                .toString();
-
-        return twitterSearchClient
-                .get()
-                .uri(url)
-                .retrieve()
-                .bodyToMono(TweetListResponse.class);
+        return getBearerToken()
+                .map(Oauth2Response::getAccessToken)
+                .flatMap(
+                        accessToken -> twitterSearchClient
+                                .get()
+                                .uri(uriBuilder -> uriBuilder.queryParams(request.getQueryMap())
+                                        .build())
+                                .header(HttpHeaders.AUTHORIZATION,
+                                        BEARER_PREFIX + accessToken)
+                                .retrieve()
+                                .bodyToMono(TweetListResponse.class)
+                );
     }
 
     /**
@@ -48,49 +58,69 @@ public class TwitterRepositoryImpl implements TwitterRepository {
      */
     @Override
     public Mono<TweetResponse> favoriteTweet(final String id) {
-
-        final OauthAuthorizationHeaderBuilder builder = OauthAuthorizationHeaderBuilder
-                .builder()
-                .method(HttpMethod.POST.name().toUpperCase())
-                .url(config.getBaseUrl() + getFavoritePath())
-                .consumerSecret(config.getApiSecret())
-                .tokenSecret(config.getAccessTokenSecret())
-                .accessToken(config.getAccessToken())
-                .consumerKey(config.getApikey())
-                .queryParameters(Map.of("id", id))
-                .build();
-
-        final String url =
-                UriComponentsBuilder.newInstance()
-                        .path(getFavoritePath())
-                        .queryParam("id", id)
-                        .build()
-                        .toString();
-
         return twitterFavoriteClient
                 .post()
-                .uri(url)
-                .header(HttpHeaders.AUTHORIZATION, builder.getOauthHeader())
+                .uri(uriBuilder -> uriBuilder.queryParam("id", id).build())
+                .header(HttpHeaders.AUTHORIZATION, getOauth2Header(id))
                 .retrieve()
                 .bodyToMono(TweetResponse.class);
+
+
     }
 
     /**
-     * searchパス取得.
-     *
-     * @return パス
+     * {@inheritDoc}
      */
-    private String getSearchPath() {
-        return config.getPath() + "search/tweets.json";
+    @Override
+    public Flux<TweetResponse> lookupTweet(final List<String> ids) {
+        final String id = String.join(",", ids);
+        return getBearerToken()
+                .map(Oauth2Response::getAccessToken)
+                .flatMapMany(
+                        accessToken -> twitterLookupClient
+                                .get()
+                                .uri(uriBuilder -> uriBuilder.queryParam("id", String.join(",", ids))
+                                        .build())
+                                .header(HttpHeaders.AUTHORIZATION,
+                                        BEARER_PREFIX + accessToken)
+                                .retrieve()
+                                .bodyToFlux(TweetResponse.class));
     }
 
     /**
-     * いいねパス取得.
+     * トークン取得.
      *
-     * @return パス
+     * @return Oauth2Response
      */
-    private String getFavoritePath() {
-        return config.getPath() + "favorites/create.json";
+    private Mono<Oauth2Response> getBearerToken() {
+
+        final MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+        body.add("grant_type", "client_credentials");
+
+        return bearerTokenTwitterClient
+                .post()
+                .bodyValue(body)
+                .retrieve()
+                .bodyToMono(Oauth2Response.class);
     }
 
+    /**
+     * Oauth2ヘッダ取得.
+     *
+     * @param id ツイートID
+     * @return Oauth2ヘッダ
+     */
+    @NonNull
+    private String getOauth2Header(final String id) {
+        return OauthAuthorizationHeaderBuilder
+                .builder()
+                .method(HttpMethod.POST.name().toUpperCase())
+                .url(twitterFavoriteApiSetting.getBaseUrl())
+                .consumerSecret(twitterFavoriteApiSetting.getApiSecret())
+                .tokenSecret(twitterFavoriteApiSetting.getAccessTokenSecret())
+                .accessToken(twitterFavoriteApiSetting.getAccessToken())
+                .consumerKey(twitterFavoriteApiSetting.getApikey())
+                .queryParameters(Map.of("id", id))
+                .build().getOauthHeader();
+    }
 }

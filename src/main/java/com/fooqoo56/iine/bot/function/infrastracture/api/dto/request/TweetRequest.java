@@ -56,6 +56,22 @@ public class TweetRequest implements Serializable {
     }
 
     /**
+     * payloadをAPIクエリへ変換.
+     *
+     * @param payload   PayLoad
+     * @param nextMaxId nextMaxId
+     * @return APIクエリ
+     */
+    public static TweetRequest buildTweetRequest(final TweetCondition payload,
+                                                 final String nextMaxId) {
+        return TweetRequest
+                .builder()
+                .query(addFilterRetweet(payload.getQuery()))
+                .maxId(nextMaxId)
+                .build();
+    }
+
+    /**
      * クエリにリツイートを除くフィルタを追加する.
      *
      * @param query クエリ
