@@ -5,10 +5,12 @@ import com.fooqoo56.iine.bot.function.domain.model.TweetCondition;
 import com.fooqoo56.iine.bot.function.exception.NotFoundTweetException;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.batch.repeat.RepeatStatus;
 import org.springframework.lang.NonNull;
@@ -20,7 +22,7 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class IiNeBotService {
 
-    private static final int RETRY_NUM_OF_TWEET = 10;
+    private static final int RETRY_NUM_OF_TWEET = 30;
 
     private final TwitterSharedService twitterSharedService;
 
@@ -34,6 +36,7 @@ public class IiNeBotService {
      * @param retweetCount   リツイート数
      * @return RepeatStatus.FINISHED
      */
+    @SuppressWarnings("checkstyle:WhitespaceAfter")
     @NonNull
     public RepeatStatus execute(final String query, final Long favoriteCount,
                                 final Long followersCount, final Long friendsCount,
@@ -44,21 +47,22 @@ public class IiNeBotService {
                         friendsCount);
 
         Mono.just(payload)
-                .log()
                 .flatMap(twitterSharedService::findTweet)
-                .map(response -> response.stream().filter(res -> isValidatedTweet(res, payload))
-                        .sorted(Comparator
+                .map(response -> {
+                    final List<TweetResponse> tweetResponseList =
+                            response.stream().filter(res -> isValidatedTweet(res, payload))
+                                    .collect(Collectors.toList());
+
+                    if (!tweetResponseList.isEmpty()) {
+                        return tweetResponseList.stream().sorted(Comparator
                                 .comparingLong(s -> s.getUser().getFavouritesCount()))
-                        .map(TweetResponse::getId)
-                        .limit(RETRY_NUM_OF_TWEET)
-                        .collect(Collectors.toList()))
-                .doOnNext(
-                        ids -> {
-                            if (ids.isEmpty()) {
-                                throw new NotFoundTweetException("ツイートが見つかりませんでした");
-                            }
-                        }
-                )
+                                .map(TweetResponse::getId)
+                                .limit(RETRY_NUM_OF_TWEET)
+                                .collect(Collectors.toList());
+                    } else {
+                        throw new NotFoundTweetException("ツイートが見つかりませんでした");
+                    }
+                })
                 .flatMap(twitterSharedService::favoriteTweet)
                 .then()
                 .block();
@@ -88,8 +92,8 @@ public class IiNeBotService {
                 && isGraterThan(res.getRetweetCount(), condition.getRetweetCount())
                 && isGraterThan(res.getUser().getFollowersCount(), condition.getFollowersCount())
                 && isGraterThan(res.getUser().getFriendsCount(), condition.getFriendsCount())
-                && !res.getSensitiveFlag()
-                && !res.getQuoteFlag()
+                && BooleanUtils.isFalse(res.getSensitiveFlag())
+                && BooleanUtils.isFalse(res.getQuoteFlag())
                 && StringUtils.isBlank(res.getInReplyToStatusId());
     }
 

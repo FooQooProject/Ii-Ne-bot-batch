@@ -8,15 +8,16 @@ import com.fooqoo56.iine.bot.function.exception.NotFoundTweetException;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.request.TweetRequest;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetListResponse;
 import com.fooqoo56.iine.bot.function.infrastracture.api.dto.response.TweetResponse;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Service
@@ -42,42 +43,59 @@ public class TwitterSharedService {
 
         if (StringUtils.isNoneBlank(payload.getQuery())) {
 
-            // グローバルなリクエスト
-            final TweetRequest request = TweetRequest.buildTweetRequest(payload);
+            final List<TweetListResponse> tweetListResponses = new ArrayList<>();
 
-            return Flux.range(1, 5)
-                    .flatMap(idx -> {
-                        if (NO_MORE_TWEET_ID.equals(request.getMaxId())) {
-                            return Mono.just(new TweetListResponse());
-                        } else {
-                            return twitterRepository.findTweet(request)
-                                    .doOnNext(res -> request.setMaxId(
-                                            res.getSearchMetaData().getNextMaxId()));
-                        }
-                    })
-                    .collectList()
-                    .map(responses -> responses.stream().map(TweetListResponse::getStatuses)
-                            .flatMap(Collection::stream).collect(Collectors.toList()));
+            return Mono.just(payload)
+                    // 一周目
+                    .map(TweetRequest::buildTweetRequest)
+                    .flatMap(twitterRepository::findTweet)
+                    .doOnNext(tweetListResponses::add)
+                    .map(TweetListResponse::getSearchMetaData)
+                    // 二周目
+                    .map(searchMetaData -> TweetRequest
+                            .buildTweetRequest(payload, searchMetaData.getNextMaxId()))
+                    .flatMap(twitterRepository::findTweet)
+                    .doOnNext(tweetListResponses::add)
+                    .map(TweetListResponse::getSearchMetaData)
+                    // 三周目
+                    .map(searchMetaData -> TweetRequest
+                            .buildTweetRequest(payload, searchMetaData.getNextMaxId()))
+                    .flatMap(twitterRepository::findTweet)
+                    .doOnNext(tweetListResponses::add)
+                    // リストのフラット処理
+                    .thenReturn(tweetListResponses)
+                    .map(this::flatTweetList);
         }
 
         throw new InvalidTweetConditionException("queryに値がありません");
     }
 
     /**
+     * ツイートリストをフラットにする.
+     *
+     * @param tweetListResponseList ツイートAPIのレスポンスのリスト
+     * @return ツイートのリスト
+     */
+    private List<TweetResponse> flatTweetList(final List<TweetListResponse> tweetListResponseList) {
+        return tweetListResponseList.stream().map(TweetListResponse::getStatuses)
+                .flatMap(Collection::stream).collect(Collectors.toList());
+    }
+
+    /**
      * ツイートをいいねする.
      *
-     * @param tweetIds ツイートIDのリスト
+     * @param ids ツイートIDのリスト
      * @throws AlreadyFavoritedTweetException 全てのツイートがすでにいいねされたツイートだった場合の例外
      */
-    public Mono<TweetResponse> favoriteTweet(final List<String> tweetIds)
+    public Mono<TweetResponse> favoriteTweet(final List<String> ids)
             throws AlreadyFavoritedTweetException {
 
-        for (final String id : tweetIds) {
-            if (StringUtils.isNoneBlank(id)) {
-                return twitterRepository.favoriteTweet(id);
-            }
-        }
-
-        throw new AlreadyFavoritedTweetException("ツイートはすでにいいね済です");
+        return twitterRepository.lookupTweet(ids)
+                .filter(response -> BooleanUtils.isFalse(response.getFavoriteFlag()))
+                .collectList()
+                .map(notFavoritedIds -> notFavoritedIds.stream().findFirst()
+                        .orElseThrow(() -> new AlreadyFavoritedTweetException("直近のツイートは全ていいね済みです")))
+                .map(TweetResponse::getId)
+                .flatMap(twitterRepository::favoriteTweet);
     }
 }

@@ -54,7 +54,7 @@ public class IiNeBotFunctionApplication {
     public static void main(final String[] args)
             throws JobParametersInvalidException, JobExecutionAlreadyRunningException,
             JobRestartException, JobInstanceAlreadyCompleteException {
-        run(new TweetCondition("Next.js", 3L, 3L, 10L, 10L));
+        run(new TweetCondition("パズドラ", 1L, 1L, 3L, 3L));
     }
 
     /**
